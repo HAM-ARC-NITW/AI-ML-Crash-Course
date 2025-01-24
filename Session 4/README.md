@@ -1,149 +1,188 @@
-# Transformer Architecture
+# Fully Connected (Linear) Layer
 
-The **Transformer architecture** is a groundbreaking design for neural networks introduced in the paper _"Attention Is All You Need"_ by Vaswani et al. (2017). It has since become the backbone of modern natural language processing (NLP) and other sequence modeling tasks, thanks to its efficient and scalable mechanism for handling sequential data without relying on recurrent or convolutional layers.
+A **Fully Connected Layer** (also known as a **Linear Layer**) is a fundamental component of artificial neural networks. It is called "fully connected" because each neuron in the layer is connected to every neuron in the previous layer. This architecture enables the network to learn complex relationships within the data by allowing information to flow freely between layers.
 
----
+## Mathematical Representation
 
-## **Key Components of the Transformer Architecture**
+In a fully connected layer, the output can be mathematically expressed as:
 
-A Transformer consists of an **encoder-decoder structure**, but many applications (e.g., BERT, GPT) focus on just one part (either the encoder or decoder). Here's how it works:
+$$
+\mathbf{y} = \mathbf{W} \cdot \mathbf{x} + \mathbf{b}
+$$
 
-### **1. Encoder Block**
+### Components
 
-The encoder processes the input sequence and generates a contextual representation. It is composed of:
+- **Output Vector** ($\mathbf{y}$): This is the result of the transformation applied to the input vector by the layer.
+- **Weight Matrix** ($\mathbf{W}$): This matrix contains the weights that determine the strength of the connections between the input features and the neurons in the layer. Each entry $w_{ij}$ represents the weight connecting the $j^{th}$ input to the $i^{th}$ neuron.
+- **Input Vector** ($\mathbf{x}$): This vector consists of the input features fed into the layer.
+- **Bias Vector** ($\mathbf{b}$): This vector adds an additional degree of freedom to the model. Each neuron has its bias term, which allows the model to fit the data better.
 
-- **Input Embedding and Positional Encoding**: Since Transformers do not process input sequentially, positional information must be explicitly encoded. Positional encoding is added to word embeddings to provide a sense of order.
-- **Self-Attention Mechanism**: The attention mechanism allows the model to focus on different parts of the input sequence dynamically.
-- **Feed-Forward Network (FFN)**: A fully connected network applied to each token separately, with non-linear activations (e.g., ReLU).
+### General Dimension Expressions
 
-Each encoder block follows this sequence:
+1. **For Single Input:**
 
-- **Multi-Head Self-Attention**
-- **Add & Layer Normalization (Residual Connection)**
-- **Feed-Forward Network**
-- **Add & Layer Normalization (Residual Connection)**
+   - If the input vector $\mathbf{x}$ has a shape of $(n, 1)$:
+     - Input: $\mathbf{x} \in \mathbb{R}^{n \times 1}$
+     - Weight matrix: $\mathbf{W} \in \mathbb{R}^{m \times n}$
+     - Bias vector: $\mathbf{b} \in \mathbb{R}^{m \times 1}$
+     - Output: $\mathbf{y} \in \mathbb{R}^{m \times 1}$
 
-These steps are stacked multiple times (e.g., 6, 12, or more layers).
+2. **For Batched Input:**
+   - If the input matrix $\mathbf{X}$ has a shape of $(b, n)$, where $b$ is the batch size:
+     - Input: $\mathbf{X} \in \mathbb{R}^{b \times n}$
+     - Weight matrix: $\mathbf{W} \in \mathbb{R}^{m \times n}$
+     - Bias vector: $\mathbf{b} \in \mathbb{R}^{m \times 1}$
+     - Output: $\mathbf{Y} \in \mathbb{R}^{b \times m}$
 
----
+### Example
 
-### **2. Decoder Block**
+Consider a specific example where:
 
-The decoder generates the output sequence, token by token, using the encoder’s output. It is similar to the encoder but includes additional components:
+- An input vector $\mathbf{x}$ has the shape $(3, 1)$:
 
-- **Masked Self-Attention Mechanism**: Prevents tokens from attending to future tokens by masking future positions in the sequence.
+$$
+\mathbf{x} = \begin{pmatrix}
+x_1 \\
+x_2 \\
+x_3
+\end{pmatrix}
+$$
 
-- **Encoder-Decoder Attention**: The decoder attends to the encoder’s output using a cross-attention mechanism to retrieve relevant context.
+- A weight matrix $\mathbf{W}$ has the shape $(2, 3)$:
 
-Each decoder block follows:
+$$
+\mathbf{W} = \begin{pmatrix}
+w_{11} & w_{12} & w_{13} \\
+w_{21} & w_{22} & w_{23}
+\end{pmatrix}
+$$
 
-- **Masked Multi-Head Self-Attention**
-- **Add & Layer Normalization (Residual Connection)**
-- **Encoder-Decoder Attention**
-- **Add & Layer Normalization (Residual Connection)**
-- **Feed-Forward Network**
-- **Add & Layer Normalization (Residual Connection)**
+- A bias vector $\mathbf{b}$ has the shape $(2, 1)$:
 
----
+$$
+\mathbf{b} = \begin{pmatrix}
+b_1 \\
+b_2
+\end{pmatrix}
+$$
 
-### **3. Final Linear Layer and Softmax**
+The output $\mathbf{y}$ will be computed as follows:
 
-For prediction tasks, the decoder output is passed through a linear layer and a softmax function to generate probabilities over the vocabulary.
+$$
+\mathbf{y} = \mathbf{W} \cdot \mathbf{x} + \mathbf{b}
+$$
 
----
+Performing the matrix multiplication and addition gives:
 
-## **Attention Mechanism in Transformers**
+$$
+\mathbf{y} = \begin{pmatrix}
+w_{11}x_1 + w_{12}x_2 + w_{13}x_3 + b_1 \\
+w_{21}x_1 + w_{22}x_2 + w_{23}x_3 + b_2
+\end{pmatrix}
+$$
 
-The **attention mechanism** is the core of the Transformer. It allows the model to selectively focus on relevant parts of the input sequence.
+In this example, $\mathbf{y}$ will have the shape $(2, 1)$, indicating that there are two neurons in this layer.
 
-### **Scaled Dot-Product Attention**
+## Activation Functions
 
-Given a query vector \( Q \), key vector \( K \), and value vector \( V \):
+Activation functions are essential for introducing non-linearity into neural networks, enabling them to learn and approximate complex functions. Without activation functions, the entire neural network would behave like a linear model, severely limiting its capacity to solve complex problems.
 
-1. Compute the dot product between \( Q \) and \( K^T \), scaled by \( \sqrt{d_k} \), where \( d_k \) is the dimension of the keys. This produces attention scores.
+### 1. Sigmoid Activation Function
 
-   ```math
-   \text{Attention Scores} = \frac{Q K^T}{\sqrt{d_k}}
-   ```
+The **Sigmoid** function maps any real-valued number into the range (0, 1). It is particularly useful for binary classification problems.
 
-2. Apply the softmax function to normalize these scores into probabilities.
+$$
+\sigma(x) = \frac{1}{1 + e^{-x}}
+$$
 
-   ```math
-   \text{Attention Weights} = \text{softmax}\left(\frac{Q K^T}{\sqrt{d_k}}\right)
-   ```
+#### Properties
 
-3. Multiply the attention weights by \( V \) to produce the output.
-   ```math
-   \text{Output} = \text{Attention Weights} \cdot V
-   ```
+- **Range**: (0, 1)
+- **Derivative**: The derivative of the sigmoid function is given by:
 
-This process enables each token to attend to every other token in the sequence.
+$$
+\sigma'(x) = \sigma(x)(1 - \sigma(x))
+$$
 
----
+### 2. ReLU (Rectified Linear Unit)
 
-### **Multi-Head Attention**
+The **ReLU** function is one of the most widely used activation functions in deep learning. It outputs the input directly if it is positive; otherwise, it outputs zero.
 
-Instead of applying attention once, Transformers use **multi-head attention** to capture information from different representation subspaces.
+$$
+\text{ReLU}(x) = \max(0, x)
+$$
 
-1. Input embeddings are linearly projected into multiple sets of \( Q, K, V \) matrices (typically 8 or 16 heads).
-2. Each head computes scaled dot-product attention independently.
-3. Outputs from all heads are concatenated and projected through another linear layer.
+#### Properties
 
-The formula:
+- **Range**: [0, ∞)
+- **Derivative**: The derivative of ReLU is:
 
-```math
-\text{MultiHead}(Q, K, V) = \text{Concat}(\text{head}_1, \dots, \text{head}_h) W^O
-```
+$$
+\text{ReLU}'(x) =
+\begin{cases}
+1 & \text{if } x > 0 \\
+0 & \text{if } x \leq 0
+\end{cases}
+$$
 
-Where
+### 3. Tanh (Hyperbolic Tangent)
 
-```math
-\text{head}_i = \text{Attention}(Q W_i^Q, K W_i^K, V W_i^V)
-```
+The **Tanh** function is similar to the sigmoid function but maps input to the range (-1, 1), making it zero-centered.
 
-**Benefits:**
+$$
+\tanh(x) = \frac{e^{x} - e^{-x}}{e^{x} + e^{-x}}
+$$
 
-- Multi-head attention allows the model to focus on different positions and capture richer representations.
+#### Properties
 
----
+- **Range**: (-1, 1)
+- **Derivative**: The derivative of the tanh function is given by:
 
-### **Positional Encoding**
+$$
+\tanh'(x) = 1 - \tanh^2(x)
+$$
 
-Transformers lack a sense of order in sequences, as they do not have recurrent structures. To address this, **positional encoding** is added to the embeddings. Commonly, sinusoidal functions are used:
+## Loss Functions
 
-```math
-PE_{(pos, 2i)} = \sin\left(\frac{pos}{10000^{2i/d_\text{model}}}\right)
-```
+Loss functions are critical for training neural networks, as they quantify the difference between the predicted output and the actual output. During training, the model optimizes its parameters to minimize the loss function, improving its predictive accuracy.
 
-```math
-PE_{(pos, 2i+1)} = \cos\left(\frac{pos}{10000^{2i/d_\text{model}}}\right)
-```
+### 1. Mean Squared Error (MSE)
 
-Where \( pos \) is the position and \( i \) is the embedding index.
+For regression tasks, the **Mean Squared Error** is defined as:
 
-This encoding enables the model to learn positional relationships.
+$$
+\text{MSE} = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2
+$$
 
----
+Where:
 
-## **Advantages of Transformers**
+- $y_i$ is the true value.
+- $\hat{y}_i$ is the predicted value.
+- $n$ is the number of observations.
 
-1. **Parallelism**: Unlike RNNs, Transformers process entire sequences simultaneously, making them faster to train.
-2. **Long-Range Dependencies**: The attention mechanism can model dependencies between distant tokens effectively.
-3. **Scalability**: Transformers scale well with data and computational resources, enabling their application to large-scale models like GPT and BERT.
+### 2. Binary Cross-Entropy (BCE)
 
----
+For binary classification problems, the **Binary Cross-Entropy** loss function measures the performance of a classification model whose output is a probability value between 0 and 1.
 
-## **Applications of Transformers**
+$$
+\text{BCE} = -\frac{1}{n} \sum_{i=1}^{n} [y_i \log(\hat{y}_i) + (1 - y_i) \log(1 - \hat{y}_i)]
+$$
 
-- **NLP**: Language models (GPT, BERT, T5), machine translation, summarization, question answering.
-- **Vision**: Vision Transformers (ViT) for image classification.
-- **Speech**: Speech recognition and synthesis.
-- **Multimodal Tasks**: Combining text, images, and other modalities.
+Where:
 
----
+- $y_i$ is the true label (0 or 1).
+- $\hat{y}_i$ is the predicted probability.
 
-### **Diagram of a Transformer**
+### 3. Categorical Cross-Entropy (CCE)
 
-Below is a visual representation of the Transformer architecture:
+For multi-class classification problems, the **Categorical Cross-Entropy** loss function is defined as:
 
-![Transformer Architecture](.\TransformerArchitecturepng.png)
+$$
+\text{CCE} = -\sum_{i=1}^{C} y_i \log(\hat{y}_i)
+$$
+
+Where:
+
+- $C$ is the number of classes.
+- $y_i$ is the true probability distribution (one-hot encoded).
+- $\hat{y}_i$ is the predicted probability distribution.

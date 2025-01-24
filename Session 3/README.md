@@ -1,188 +1,111 @@
-# Fully Connected (Linear) Layer
+# Introduction to Logistic Regression
 
-A **Fully Connected Layer** (also known as a **Linear Layer**) is a fundamental component of artificial neural networks. It is called "fully connected" because each neuron in the layer is connected to every neuron in the previous layer. This architecture enables the network to learn complex relationships within the data by allowing information to flow freely between layers.
+## 1. What is Logistic Regression?
 
-## Mathematical Representation
+Logistic regression is a **classification algorithm** that predicts the probability of a binary outcome (0 or 1). Despite its name, it is used for classification tasks, not regression. It estimates the probability that an instance belongs to a particular class using a **sigmoid function**.
 
-In a fully connected layer, the output can be mathematically expressed as:
+---
 
-$$
-\mathbf{y} = \mathbf{W} \cdot \mathbf{x} + \mathbf{b}
-$$
+## 2. Difference Between Linear and Logistic Regression
 
-### Components
+- **Linear Regression**: Used for predicting continuous values.
+- **Logistic Regression**: Used for predicting probabilities and classifying into categories (usually binary).
 
-- **Output Vector** ($\mathbf{y}$): This is the result of the transformation applied to the input vector by the layer.
-- **Weight Matrix** ($\mathbf{W}$): This matrix contains the weights that determine the strength of the connections between the input features and the neurons in the layer. Each entry $w_{ij}$ represents the weight connecting the $j^{th}$ input to the $i^{th}$ neuron.
-- **Input Vector** ($\mathbf{x}$): This vector consists of the input features fed into the layer.
-- **Bias Vector** ($\mathbf{b}$): This vector adds an additional degree of freedom to the model. Each neuron has its bias term, which allows the model to fit the data better.
+---
 
-### General Dimension Expressions
+## 3. Sigmoid Function
 
-1. **For Single Input:**
-
-   - If the input vector $\mathbf{x}$ has a shape of $(n, 1)$:
-     - Input: $\mathbf{x} \in \mathbb{R}^{n \times 1}$
-     - Weight matrix: $\mathbf{W} \in \mathbb{R}^{m \times n}$
-     - Bias vector: $\mathbf{b} \in \mathbb{R}^{m \times 1}$
-     - Output: $\mathbf{y} \in \mathbb{R}^{m \times 1}$
-
-2. **For Batched Input:**
-   - If the input matrix $\mathbf{X}$ has a shape of $(b, n)$, where $b$ is the batch size:
-     - Input: $\mathbf{X} \in \mathbb{R}^{b \times n}$
-     - Weight matrix: $\mathbf{W} \in \mathbb{R}^{m \times n}$
-     - Bias vector: $\mathbf{b} \in \mathbb{R}^{m \times 1}$
-     - Output: $\mathbf{Y} \in \mathbb{R}^{b \times m}$
-
-### Example
-
-Consider a specific example where:
-
-- An input vector $\mathbf{x}$ has the shape $(3, 1)$:
+The sigmoid function transforms the linear equation into a probability value:
 
 $$
-\mathbf{x} = \begin{pmatrix}
-x_1 \\
-x_2 \\
-x_3
-\end{pmatrix}
+\\sigma(z) = \\frac{1}{1 + e^{-z}}
 $$
 
-- A weight matrix $\mathbf{W}$ has the shape $(2, 3)$:
+The output is a probability between 0 and 1. The decision boundary is typically set at 0.5: if the output is greater than 0.5, the instance is classified as 1 (positive), otherwise, it is 0 (negative).
+
+---
+
+## 4. Logistic Regression Hypothesis Function
+
+The logistic regression hypothesis is:
 
 $$
-\mathbf{W} = \begin{pmatrix}
-w_{11} & w_{12} & w_{13} \\
-w_{21} & w_{22} & w_{23}
-\end{pmatrix}
+h_{\\theta}(x) = \\sigma(\\theta_0 + \\theta_1 x_1 + \\dots + \\theta_n x_n)
 $$
 
-- A bias vector $\mathbf{b}$ has the shape $(2, 1)$:
+Where `\\theta` represents the learned parameters, and `x` represents the input features.
+
+---
+
+## 5. Cost Function (Log Loss)
+
+The cost function for logistic regression, called **log loss** or **binary cross-entropy**, is:
 
 $$
-\mathbf{b} = \begin{pmatrix}
-b_1 \\
-b_2
-\end{pmatrix}
+J(\\theta) = -\\frac{1}{m} \\sum_{i=1}^{m} \\left[ y^{(i)} \\log(h_{\\theta}(x^{(i)})) + (1 - y^{(i)}) \\log(1 - h_{\\theta}(x^{(i)})) \\right]
 $$
 
-The output $\mathbf{y}$ will be computed as follows:
+This function helps to minimize the difference between the predicted probabilities and the actual labels.
 
-$$
-\mathbf{y} = \mathbf{W} \cdot \mathbf{x} + \mathbf{b}
-$$
+---
 
-Performing the matrix multiplication and addition gives:
+## 6. Gradient Descent and Optimization
 
-$$
-\mathbf{y} = \begin{pmatrix}
-w_{11}x_1 + w_{12}x_2 + w_{13}x_3 + b_1 \\
-w_{21}x_1 + w_{22}x_2 + w_{23}x_3 + b_2
-\end{pmatrix}
-$$
+Gradient descent is used to find the optimal parameters \( \\theta \) by iteratively adjusting them in the direction that reduces the cost function. In **scikit-learn**, optimization is handled internally using algorithms like **L-BFGS**.
 
-In this example, $\mathbf{y}$ will have the shape $(2, 1)$, indicating that there are two neurons in this layer.
+---
 
-## Activation Functions
+## 7. Regularization in Logistic Regression
 
-Activation functions are essential for introducing non-linearity into neural networks, enabling them to learn and approximate complex functions. Without activation functions, the entire neural network would behave like a linear model, severely limiting its capacity to solve complex problems.
+Regularization helps prevent **overfitting** by penalizing large weights:
 
-### 1. Sigmoid Activation Function
+- **L1 (Lasso)**: Adds an absolute value penalty on the weights.
+- **L2 (Ridge)**: Adds a squared value penalty on the weights.
 
-The **Sigmoid** function maps any real-valued number into the range (0, 1). It is particularly useful for binary classification problems.
+---
 
-$$
-\sigma(x) = \frac{1}{1 + e^{-x}}
-$$
+## 8. Multiclass Classification (Optional)
 
-#### Properties
+Logistic regression can be extended to handle multiclass problems using strategies like **one-vs-rest (OvR)** or **softmax regression** for multi-class classification.
 
-- **Range**: (0, 1)
-- **Derivative**: The derivative of the sigmoid function is given by:
+---
 
-$$
-\sigma'(x) = \sigma(x)(1 - \sigma(x))
-$$
+# Practical Implementation of Logistic Regression with Scikit-learn
 
-### 2. ReLU (Rectified Linear Unit)
+## Example Code:
 
-The **ReLU** function is one of the most widely used activation functions in deep learning. It outputs the input directly if it is positive; otherwise, it outputs zero.
+```python
+# Step 1: Import necessary libraries
+import numpy as np
+import pandas as pd
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, classification_report
 
-$$
-\text{ReLU}(x) = \max(0, x)
-$$
+# Step 2: Load the dataset
+data = load_breast_cancer()
+X = data['data']
+y = data['target']
 
-#### Properties
+# Step 3: Split data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-- **Range**: [0, ∞)
-- **Derivative**: The derivative of ReLU is:
+# Step 4: Create and train the logistic regression model
+model = LogisticRegression(max_iter=10000)
+model.fit(X_train, y_train)
 
-$$
-\text{ReLU}'(x) =
-\begin{cases}
-1 & \text{if } x > 0 \\
-0 & \text{if } x \leq 0
-\end{cases}
-$$
+# Step 5: Make predictions
+y_pred = model.predict(X_test)
 
-### 3. Tanh (Hyperbolic Tangent)
+# Step 6: Evaluate the model's accuracy
+accuracy = accuracy_score(y_test, y_pred)
+print(f'Accuracy: {accuracy:.2f}')
 
-The **Tanh** function is similar to the sigmoid function but maps input to the range (-1, 1), making it zero-centered.
+# Step 7: Print a detailed classification report
+print(classification_report(y_test, y_pred))
 
-$$
-\tanh(x) = \frac{e^{x} - e^{-x}}{e^{x} + e^{-x}}
-$$
-
-#### Properties
-
-- **Range**: (-1, 1)
-- **Derivative**: The derivative of the tanh function is given by:
-
-$$
-\tanh'(x) = 1 - \tanh^2(x)
-$$
-
-## Loss Functions
-
-Loss functions are critical for training neural networks, as they quantify the difference between the predicted output and the actual output. During training, the model optimizes its parameters to minimize the loss function, improving its predictive accuracy.
-
-### 1. Mean Squared Error (MSE)
-
-For regression tasks, the **Mean Squared Error** is defined as:
-
-$$
-\text{MSE} = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2
-$$
-
-Where:
-
-- $y_i$ is the true value.
-- $\hat{y}_i$ is the predicted value.
-- $n$ is the number of observations.
-
-### 2. Binary Cross-Entropy (BCE)
-
-For binary classification problems, the **Binary Cross-Entropy** loss function measures the performance of a classification model whose output is a probability value between 0 and 1.
-
-$$
-\text{BCE} = -\frac{1}{n} \sum_{i=1}^{n} [y_i \log(\hat{y}_i) + (1 - y_i) \log(1 - \hat{y}_i)]
-$$
-
-Where:
-
-- $y_i$ is the true label (0 or 1).
-- $\hat{y}_i$ is the predicted probability.
-
-### 3. Categorical Cross-Entropy (CCE)
-
-For multi-class classification problems, the **Categorical Cross-Entropy** loss function is defined as:
-
-$$
-\text{CCE} = -\sum_{i=1}^{C} y_i \log(\hat{y}_i)
-$$
-
-Where:
-
-- $C$ is the number of classes.
-- $y_i$ is the true probability distribution (one-hot encoded).
-- $\hat{y}_i$ is the predicted probability distribution.
+# Step 8: Predict probabilities (Optional)
+probabilities = model.predict_proba(X_test)
+print(probabilities[:5])
+```
